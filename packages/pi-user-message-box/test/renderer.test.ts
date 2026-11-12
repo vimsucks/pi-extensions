@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { Markdown, type MarkdownTheme } from "@earendil-works/pi-tui";
+import { Markdown, visibleWidth, type MarkdownTheme } from "@earendil-works/pi-tui";
 import {
   patchNativeUserMessagePrototype,
   type PatchableUserMessagePrototype,
@@ -45,11 +45,28 @@ test("frames a user message and preserves OSC 133 prompt zones", () => {
   const output = prototype.render(24);
 
   assert.equal(output[0], OSC_START);
-  assert.match(output[1] ?? "", /^╭ user ─+╮$/);
+  assert.match(output[1] ?? "", /^╭  ─+╮$/);
   assert.equal(output[3], "│ message:20           │");
   assert.match((output.at(-1) ?? "").slice(OSC_END.length), /^╰─+╯$/);
   assert.ok((output.at(-1) ?? "").startsWith(OSC_END));
   assert.ok(output.slice(1, -1).every((line) => [...line].length === 24));
+});
+
+test("uses the configured title", () => {
+  const previous = process.env.PI_USER_MESSAGE_BOX_TITLE;
+  process.env.PI_USER_MESSAGE_BOX_TITLE = "user";
+  try {
+    const prototype = fixture();
+    patchNativeUserMessagePrototype(prototype, () => undefined, () => true);
+    assert.match(prototype.render(24)[1] ?? "", /^╭ user ─+╮$/);
+    process.env.PI_USER_MESSAGE_BOX_TITLE = "用户";
+    const wide = fixture();
+    patchNativeUserMessagePrototype(wide, () => undefined, () => true);
+    assert.equal(visibleWidth(wide.render(24)[1] ?? ""), 24);
+  } finally {
+    if (previous === undefined) delete process.env.PI_USER_MESSAGE_BOX_TITLE;
+    else process.env.PI_USER_MESSAGE_BOX_TITLE = previous;
+  }
 });
 
 test("preserves ordered-list markers and applies user markdown transformers", () => {

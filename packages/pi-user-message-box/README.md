@@ -3,7 +3,7 @@
 A focused [Pi](https://pi.dev/) extension that renders every user message in a bordered, theme-aware box.
 
 ```text
-╭ user ─────────────────────────────────────╮
+╭  ────────────────────────────────────────╮
 │                                           │
 │ Explain why this test is flaky.           │
 │                                           │
@@ -22,6 +22,12 @@ This extension changes only the interactive rendering of normal user messages. I
 - preserves Markdown styling and terminal prompt markers;
 - restores Pi's original renderer during reload and shutdown;
 - falls back to Pi's renderer when the terminal is narrower than eight columns.
+
+The default title is the Nerd Font user icon ``. Use a Nerd Font in your terminal to display it. To use text instead, set `PI_USER_MESSAGE_BOX_TITLE` before starting Pi:
+
+```sh
+export PI_USER_MESSAGE_BOX_TITLE=user
+```
 
 ## Installation
 

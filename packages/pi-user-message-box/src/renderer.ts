@@ -54,7 +54,6 @@ interface CachedUserMessageBodyLines {
 }
 
 const MIN_BORDER_WIDTH = 8;
-const TITLE_TEXT = " user ";
 const CONTENT_HORIZONTAL_PADDING_COLUMNS = 1;
 const USER_MESSAGE_TOP_MARGIN_LINES = 1;
 const USER_MESSAGE_PATCH_VERSION = 8;
@@ -109,7 +108,7 @@ function buildTopBorder(
   theme: UserMessageTheme | undefined,
 ): string {
   const innerWidth = computeBoxInnerWidth(totalWidth);
-  const title = truncateToWidth(TITLE_TEXT, innerWidth, "");
+  const title = truncateToWidth(` ${process.env.PI_USER_MESSAGE_BOX_TITLE ?? ""} `, innerWidth, "");
   const fill = "─".repeat(Math.max(0, innerWidth - visibleWidth(title)));
   const row = `${colorBorder(theme, "╭")}${colorTitle(theme, title)}${colorBorder(theme, `${fill}╮`)}`;
 
