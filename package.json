@@ -3,7 +3,12 @@
   "private": true,
   "type": "module",
   "pi": {
-    "extensions": ["./extensions/herdr-session-title/index.js"]
+    "extensions": [
+      "./extensions/herdr-session-title/index.js",
+      "./packages/pi-goon/goon.ts",
+      "./packages/pi-user-message-box/src/index.ts",
+      "./packages/pi-inline-skills/extensions/index.ts"
+    ]
   },
   "scripts": {
     "test": "node --test tests/*.test.mjs"

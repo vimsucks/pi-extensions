@@ -1,0 +1,10 @@
+This project contains user-message rendering code derived from:
+
+  pi-tool-display
+  https://github.com/MasuRii/pi-tool-display
+  Copyright (c) 2026 MasuRii
+  MIT License
+
+The extracted code was renamed and reduced to a standalone Pi extension. Tool
+renderers, tool overrides, presets, settings UI, capability detection, and
+runtime configuration were removed.
