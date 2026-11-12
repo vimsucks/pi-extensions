@@ -27,6 +27,7 @@ import {
 export interface UserMessageTheme extends UserMessageBackgroundTheme {
   fg(color: string, text: string): string;
   bold?(text: string): string;
+  readonly colors?: unknown;
 }
 
 interface CachedUserMessageMarkdownRenderer {
@@ -41,6 +42,7 @@ interface CachedUserMessageMarkdownRenderer {
 interface CachedUserMessageFinalOutput {
   width: number;
   theme: UserMessageTheme | undefined;
+  themeColors: unknown;
   hasMarkdownState: boolean;
   text?: string;
   markdownTheme?: unknown;
@@ -221,7 +223,7 @@ function hasSameFinalOutputState(
   theme: UserMessageTheme | undefined,
   markdownState: UserMessageMarkdownState | undefined,
 ): boolean {
-  if (cached.width !== width || cached.theme !== theme) {
+  if (cached.width !== width || cached.theme !== theme || cached.themeColors !== theme?.colors) {
     return false;
   }
 
@@ -250,6 +252,7 @@ function toFinalOutputCacheEntry(
     return {
       width,
       theme,
+      themeColors: theme?.colors,
       hasMarkdownState: false,
       output,
     };
@@ -259,6 +262,7 @@ function toFinalOutputCacheEntry(
     width,
     theme,
     hasMarkdownState: true,
+    themeColors: theme?.colors,
     text: markdownState.text,
     markdownTheme: markdownState.theme,
     defaultTextStyle: markdownState.defaultTextStyle,

@@ -135,7 +135,7 @@ export default function piInlineSkills(pi: ExtensionAPI) {
   pi.on("before_agent_start", async (event, ctx) => {
     const names = pendingSkillNames;
     pendingSkillNames = [];
-    if (names.length === 0) return;
+    if (names.length === 0 || event.messageType !== "user") return;
 
     const expandedNames = findExpandedSkillNames(event.prompt);
     const namesToInject = names.filter((name) => !expandedNames.has(name));

@@ -205,12 +205,20 @@ describe("extension event wiring", () => {
     assert.deepEqual(inputResult, { action: "continue" });
 
     const result = await beforeAgentStart(
-      { prompt: "Use /code-review for this change" },
+      { messageType: "user", prompt: "Use /code-review for this change" },
       context(),
     );
     assert.equal(result.message.customType, CUSTOM_MESSAGE_TYPE);
     assert.equal(result.message.details.skills[0].mode, "loaded");
     assert.match(result.message.content, /Inspect the change\./);
+  });
+
+  it("ignores a custom-message run without a user prompt", async () => {
+    const input = handlers.get("input");
+    const beforeAgentStart = handlers.get("before_agent_start");
+    assert.ok(input && beforeAgentStart);
+    await input({ source: "interactive", text: "Use /code-review", streamingBehavior: undefined }, context());
+    assert.equal(await beforeAgentStart({ messageType: "custom", message: {} }, context()), undefined);
   });
 
   it("reuses a full definition that remains in effective context", async () => {
@@ -227,7 +235,7 @@ describe("extension event wiring", () => {
       context(),
     );
 
-    const first = await beforeAgentStart({ prompt: "Again use /code-review" }, context());
+    const first = await beforeAgentStart({ messageType: "user", prompt: "Again use /code-review" }, context());
     const entry = {
       type: "custom_message",
       customType: first.message.customType,
@@ -245,7 +253,7 @@ describe("extension event wiring", () => {
       context([entry]),
     );
     const reused = await beforeAgentStart(
-      { prompt: "One more /code-review pass" },
+      { messageType: "user", prompt: "One more /code-review pass" },
       context([entry]),
     );
 
@@ -272,6 +280,6 @@ describe("extension event wiring", () => {
     assert.deepEqual(result, { action: "continue" });
     assert.equal(sentMessages.length, sentBefore);
     assert.match(notifications.at(-1) ?? "", /not injected into steering or follow-up/);
-    assert.equal(await beforeAgentStart({ prompt: "next idle prompt" }, context()), undefined);
+    assert.equal(await beforeAgentStart({ messageType: "user", prompt: "next idle prompt" }, context()), undefined);
   });
 });

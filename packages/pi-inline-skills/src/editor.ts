@@ -48,7 +48,7 @@ export function wrapInlineAutocompleteEditor(editor: EditorComponent): EditorCom
     const cursor = candidate.getCursor();
     const beforeCursor = textBeforeCursor(lines, cursor.line, cursor.col);
     if (findInlineSkillCompletion(beforeCursor)) {
-      // Pi 0.84.2 filters "/" from custom triggerCharacters, so ask its editor
+      // Pi 1.5.2 filters "/" from custom triggerCharacters, so ask its editor
       // to run the already-registered provider when an inline token is present.
       candidate.tryTriggerAutocomplete();
     }

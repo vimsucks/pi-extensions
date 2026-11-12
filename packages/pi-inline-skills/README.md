@@ -51,7 +51,7 @@ Explain this change
 
 Selecting the suggestion inserts `/code-review `, including a trailing space. Once an inline skill token starts, its completion list contains only matching skills and never falls back to file suggestions.
 
-Pi 0.84.2 does not expose inline `/` as a custom autocomplete trigger. The extension therefore wraps the active editor component and requests the registered provider when an inline skill token is typed. Existing custom editor factories registered before this extension are preserved; editors without Pi's autocomplete request capability still retain manual Tab completion.
+Pi 1.5.2 does not expose inline `/` as a custom autocomplete trigger. The extension therefore wraps the active editor component and requests the registered provider when an inline skill token is typed. Existing custom editor factories registered before this extension are preserved; editors without Pi's autocomplete request capability still retain manual Tab completion.
 
 ### Command ownership
 

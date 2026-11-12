@@ -47,6 +47,11 @@ export default function (pi) {
       if (!state) {
         state = { owner: globalThis[OWNER], tab: tabId, original: tab.name === String(index + 1) ? null : tab.name, last: tab.name };
       } else {
+        if (Object.hasOwn(state, "pending")) {
+          const pendingName = state.pending === null ? String(index + 1) : state.pending;
+          if (tab.name === pendingName) state.last = state.pending;
+          delete state.pending;
+        }
         const expected = state.last === null ? String(index + 1) : state.last;
         if (tab.name !== expected) {
           await save({ ...state, disabled: true });
@@ -56,6 +61,7 @@ export default function (pi) {
       const target = quit || !name ? state.original : name;
       const displayed = target === null ? String(index + 1) : target;
       if (tab.name !== displayed || (target === null && state.last !== null)) {
+        await save({ ...state, pending: target });
         const renamed = await pi.exec("herdr-app", ["do", "tab.rename", JSON.stringify({ id: tabId, name: target ?? "" })], { timeout: 3000 });
         if (renamed.code !== 0) throw new Error("Could not rename Herdr tab");
       }

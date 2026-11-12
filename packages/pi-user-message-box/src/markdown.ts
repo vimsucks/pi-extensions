@@ -14,12 +14,16 @@ type MarkdownTransformer = (
     messageType: "user";
     isStreaming: false;
     availableWidth: number;
+    messageId?: string;
+    timestamp?: string;
   },
 ) => string;
 
 interface UserMessageLike {
   children?: unknown;
   markdownTransformers?: unknown;
+  messageId?: unknown;
+  timestamp?: unknown;
 }
 
 export interface UserMessageMarkdownState {
@@ -60,7 +64,7 @@ function findMarkdownChild(value: unknown): MarkdownLike | undefined {
   return undefined;
 }
 
-function createTransform(value: unknown): UserMessageMarkdownState["transform"] {
+function createTransform(value: unknown, userMessage: UserMessageLike): UserMessageMarkdownState["transform"] {
   const transformers = Array.isArray(value)
     ? value.filter((item): item is MarkdownTransformer => typeof item === "function")
     : [];
@@ -73,6 +77,8 @@ function createTransform(value: unknown): UserMessageMarkdownState["transform"] 
           messageType: "user",
           isStreaming: false,
           availableWidth,
+          messageId: typeof userMessage.messageId === "string" ? userMessage.messageId : undefined,
+          timestamp: typeof userMessage.timestamp === "string" ? userMessage.timestamp : undefined,
         });
         if (typeof next === "string") transformed = next;
       } catch {
@@ -95,6 +101,6 @@ export function extractUserMessageMarkdownState(
     text: markdownChild.text,
     theme: markdownChild.theme,
     defaultTextStyle: sanitizeDefaultTextStyle(markdownChild.defaultTextStyle),
-    transform: createTransform(userMessage.markdownTransformers),
+    transform: createTransform(userMessage.markdownTransformers, userMessage),
   };
 }

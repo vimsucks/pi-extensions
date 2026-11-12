@@ -6,9 +6,25 @@ import {
   type PatchableUserMessagePrototype,
 } from "../src/renderer.js";
 import { unregisterUserMessageRenderPrototypePatch } from "../src/patch.js";
+import { UserMessageComponent, type ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import userMessageBox from "../src/index.js";
 
 const OSC_START = "\x1b]133;A\x07";
 const OSC_END = "\x1b]133;B\x07\x1b]133;C\x07";
+
+test("patches user messages only during interactive sessions", () => {
+  const handlers = new Map<string, (...args: unknown[]) => void>();
+  const pi = { on: (event: string, handler: (...args: unknown[]) => void) => handlers.set(event, handler) } as unknown as ExtensionAPI;
+  const original = UserMessageComponent.prototype.render;
+  userMessageBox(pi);
+  assert.equal(UserMessageComponent.prototype.render, original);
+  handlers.get("session_start")?.({}, { mode: "print", ui: {} });
+  assert.equal(UserMessageComponent.prototype.render, original);
+  handlers.get("session_start")?.({}, { mode: "tui", ui: { theme: undefined } });
+  assert.notEqual(UserMessageComponent.prototype.render, original);
+  handlers.get("session_shutdown")?.();
+  assert.equal(UserMessageComponent.prototype.render, original);
+});
 
 function fixture(): PatchableUserMessagePrototype {
   return {
@@ -67,6 +83,29 @@ test("uses the configured title", () => {
     if (previous === undefined) delete process.env.PI_USER_MESSAGE_BOX_TITLE;
     else process.env.PI_USER_MESSAGE_BOX_TITLE = previous;
   }
+});
+
+test("updates cached output after a theme change", () => {
+  const prototype = fixture();
+  const theme = { colors: { border: "old" }, fg: (_color: string, text: string) => `${theme.colors.border}:${text}` };
+  patchNativeUserMessagePrototype(prototype, () => theme, () => true);
+  assert.match(prototype.render(24)[1] ?? "", /old:/);
+  theme.colors = { border: "new" };
+  assert.match(prototype.render(24)[1] ?? "", /new:/);
+});
+
+test("passes message identity to markdown transformers", () => {
+  const markdown = new Markdown("hello", 0, 0, plainTheme());
+  let received: unknown;
+  const prototype = Object.assign(fixture(), {
+    children: [{ children: [markdown] }],
+    messageId: "message-id",
+    timestamp: "2026-01-01T00:00:00Z",
+    markdownTransformers: [(text: string, context: unknown) => { received = context; return text; }],
+  });
+  patchNativeUserMessagePrototype(prototype, () => undefined, () => true);
+  prototype.render(40);
+  assert.deepEqual(received, { messageType: "user", isStreaming: false, availableWidth: 36, messageId: "message-id", timestamp: "2026-01-01T00:00:00Z" });
 });
 
 test("preserves ordered-list markers and applies user markdown transformers", () => {
